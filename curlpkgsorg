@@ -6,7 +6,7 @@ a=$(curl -s "https://pkgs.org/search/?q=$1" \
 -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Goanna/4.0 Firefox/55.0 Basilisk/20180202")
 
 b=$(echo "$a" | grep -Pi "http.+html" | grep -Po '"http.*"' | sed 's/["]//g' \
-| grep -vi arm | grep -vi aarch | grep -vi i686 | grep -vi i586
+| grep -vi arm64 | grep -vi aarch64 | grep -vi i686 | grep -vi i586
 )
 echo "$b" | grep -n ""
 
