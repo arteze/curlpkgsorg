@@ -1,0 +1,28 @@
+#!/bin/sh
+
+echo $1
+
+a=$(curl -s "https://pkgs.org/search/?q=$1" \
+-H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Goanna/4.0 Firefox/55.0 Basilisk/20180202")
+
+b=$(echo "$a" | grep -Pi "http.+html" | grep -Po '"http.*"' | sed 's/["]//g' \
+| grep -vi arm | grep -vi aarch | grep -vi i686 | grep -vi i586
+)
+echo "$b" | grep -n ""
+
+read c
+d=$(echo "$b" | head -n $c | tail -n 1)
+echo $d
+
+e=$(curl -s "$d" \
+-H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Goanna/4.0 Firefox/55.0 Basilisk/20180202")
+
+f=$(echo "$e" | grep -Pi "td.*text-break.*http" | grep -Po 'http[^<]*' | tail -n 1)
+echo "$f"
+
+g=$(basename $f)
+
+curl $f --output $g
+
+echo $g
+xdg-open $g
