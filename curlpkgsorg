@@ -8,11 +8,40 @@ a=$(curl -s "https://pkgs.org/search/?q=$1" \
 b=$(echo "$a" | grep -Pi "http.+html" | grep -Po '"http.*"' | sed 's/["]//g' \
 | grep -vi arm64 | grep -vi aarch64 | grep -vi i686 | grep -vi i586
 )
-echo "$b" | grep -n ""
 
-read c
-d=$(echo "$b" | head -n $c | tail -n 1)
-echo $d
+#echo "$b" | grep -n ""
+
+b2=$(echo "$b" | grep slackware.pkgs.org)
+b22=$(echo "$b" | grep debian.pkgs.org)
+
+if [[ "$b2" != "" ]];then
+	#echo "$b2"
+	b3=$(echo "$b2" | grep -v "-extras")
+	if [[ "$b3" != "" ]];then # Excluyendo extras
+		b="$b3"
+	fi
+else
+	if [[ "$b22" != "" ]];then
+		b="$b22"
+	fi
+fi
+
+b4=$(echo "$b" | grep -o "/[.a-z0-9]*" | head -n3 | tail -n1)
+b5=$(echo "$b" | grep "$b4")
+if [[ "$b5" != "" ]];then
+	b="$b5"
+fi
+
+b6=$(echo "$b" | grep -c "")
+if [[ "$b6" == "1" ]];then
+	d="$b"
+else
+	echo "$b" | grep -n ""
+	read c
+	d=$(echo "$b" | head -n $c | tail -n 1)
+fi
+
+echo "$d"
 
 e=$(curl -s "$d" \
 -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Goanna/4.0 Firefox/55.0 Basilisk/20180202")
