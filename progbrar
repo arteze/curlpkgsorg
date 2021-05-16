@@ -2,4 +2,4 @@
 
 # $1 es el nombre del programa a capturar su librería faltante
 
-$1 2>&1 | sed -r "s/.*aries: //g"  | sed -r "s/:.*//g"
+curlpkgsorg $($1 2>&1 | sed -r "s/.*aries: //g"  | sed -r "s/:.*//g")
