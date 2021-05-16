@@ -1,5 +1,6 @@
 #!/bin/sh
 
 # $1 es el nombre del programa a capturar su librería faltante
+# $2 puede estar vacío, o ser noslackware
 
-curlpkgsorg $($1 2>&1 | sed -r "s/.*aries: //g"  | sed -r "s/:.*//g")
+curlpkgsorg $($1 2>&1 | sed -r "s/.*aries: //g"  | sed -r "s/:.*//g") $2
