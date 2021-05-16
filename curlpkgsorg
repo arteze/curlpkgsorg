@@ -14,7 +14,7 @@ b=$(echo "$a" | grep -Pi "http.+html" | grep -Po '"http.*"' | sed 's/["]//g' \
 b2=$(echo "$b" | grep slackware.pkgs.org)
 b22=$(echo "$b" | grep debian.pkgs.org)
 
-if [[ "$b2" != "" && "$2" != "noslackare" ]];then
+if [[ "$b2" != "" && "$2" != "noslackware" ]];then
 	#echo "$b2"
 	b3=$(echo "$b2" | grep -v "-extras")
 	if [[ "$b3" != "" ]];then # Excluyendo extras
