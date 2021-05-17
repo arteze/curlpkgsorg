@@ -3,11 +3,16 @@
 echo $@
 
 h="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Goanna/4.0 Firefox/55.0 Basilisk/20180202"
-
-a=$(curl -s "https://pkgs.org/search/?q=$1" -H $h)
+i="curl -s -H \"$h\" \"https://pkgs.org/search/?q=$1\""
+a=$(eval $i)
 
 if [[ "$a" == "" ]];then
 	echo "Error de internet"
+	exit
+fi
+
+if [[ "$(echo $a | grep "<title>Error 403: Forbidden</title>")" != "" ]];then
+	echo "Error 403"
 	exit
 fi
 
@@ -38,6 +43,7 @@ if [[ "$b5" != "" ]];then
 	b="$b5"
 fi
 
+echo bee $b $b5 $b4 $b3 $b2
 if [[ "$b" != "" ]];then
 	b6=$(echo "$b" | grep -c "")
 	if [[ "$b6" == "1" ]];then
