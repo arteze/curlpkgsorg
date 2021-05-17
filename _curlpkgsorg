@@ -2,8 +2,7 @@
 
 echo $@
 
-consalto()
-{
+consalto(){
 	echo ""
 	if [[ "$2" == "ev" ]];then
 		eval "$1"
