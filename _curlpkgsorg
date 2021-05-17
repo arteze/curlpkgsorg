@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo $1
+echo $@
 
 a=$(curl -s "https://pkgs.org/search/?q=$1" \
 -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Goanna/4.0 Firefox/55.0 Basilisk/20180202")
@@ -37,26 +37,28 @@ if [[ "$b5" != "" ]];then
 	b="$b5"
 fi
 
-b6=$(echo "$b" | grep -c "")
-if [[ "$b6" == "1" ]];then
-	d="$b"
-else
-	echo "$b" | grep -n ""
-	read c
-	d=$(echo "$b" | head -n $c | tail -n 1)
-fi
+if [[ "$b" != "" ]];then
+	b6=$(echo "$b" | grep -c "")
+	if [[ "$b6" == "1" ]];then
+		d="$b"
+	else
+		echo "$b" | grep -n ""
+		read c
+		d=$(echo "$b" | head -n $c | tail -n 1)
+	fi
 
-echo "$d"
+	echo "$d"
 
-e=$(curl -s "$d" \
+	e=$(curl -s "$d" \
 -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Goanna/4.0 Firefox/55.0 Basilisk/20180202")
 
-f=$(echo "$e" | grep -Pi "td.*text-break.*http" | grep -Po 'http[^<]*' | tail -n 1)
-echo "$f"
+	f=$(echo "$e" | grep -Pi "td.*text-break.*http" | grep -Po 'http[^<]*' | tail -n 1)
+	echo "$f"
 
-g=$(basename $f)
+	g=$(basename $f)
 
-curl $f --output $g
+	curl $f --output $g
 
-echo $g
-xdg-open $g
+	echo $g
+	xdg-open $g
+fi
