@@ -2,8 +2,9 @@
 
 echo $@
 
-a=$(curl -s "https://pkgs.org/search/?q=$1" \
--H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Goanna/4.0 Firefox/55.0 Basilisk/20180202")
+h="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Goanna/4.0 Firefox/55.0 Basilisk/20180202"
+
+a=$(curl -s "https://pkgs.org/search/?q=$1" -H $h)
 
 if [[ "$a" == "" ]];then
 	echo "Error de internet"
@@ -49,8 +50,7 @@ if [[ "$b" != "" ]];then
 
 	echo "$d"
 
-	e=$(curl -s "$d" \
--H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Goanna/4.0 Firefox/55.0 Basilisk/20180202")
+	e=$(curl -s "$d" -H $h)
 
 	f=$(echo "$e" | grep -Pi "td.*text-break.*http" | grep -Po 'http[^<]*' | tail -n 1)
 	echo "$f"
@@ -62,3 +62,4 @@ if [[ "$b" != "" ]];then
 	echo $g
 	xdg-open $g
 fi
+#
