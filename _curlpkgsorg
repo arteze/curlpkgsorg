@@ -1,14 +1,14 @@
 #!/bin/sh
 
-echo $@
-
-consalto(){
-	echo ""
+mostrar_n(){
 	if [[ "$2" == "ev" ]];then
 		eval "$1"
 	else
-		echo "$1"
+		printf "$1" && printf "\012"
 	fi
+}
+mostrar(){
+	printf "$1"
 }
 cantidad_lineas(){
 	if [[ "$(printf "%s" "$1" | wc -w)" == "0" ]];then
@@ -16,13 +16,13 @@ cantidad_lineas(){
 	else
 		devuelve="$(($(printf "%s" "$1" | wc -l)+1))"
 	fi
-	echo "$devuelve"
+	mostrar "$devuelve"
 }
 seleccionar(){
-	echo "$1" | head -n "$2" | tail -n 1
+	mostrar "$1" | head -n "$2" | tail -n 1
 }
 subcaracter(){
-	printf "%s" "$1" | cut -c "$2"
+	mostrar "$1" | cut -c "$2"
 }
 cambiar_letras_por_numeros(){
 	m="pqwertyuio"
@@ -39,89 +39,102 @@ leer_y_cambiar(){
 	while [[ "$c2" != $'\n'  ]];do
 		if [[ "$c2" != "" ]];then
 			if [ "$c2" == $'\177' ]; then
-				c="$(printf "%s" "$c" | sed "s/.$//")"
-				printf "\b \b"
+				c="$(mostrar "$c" | sed "s/.$//")"
+				mostrar "\b"
 			else
 				c3="$(cambiar_letras_por_numeros "$c2")"
 				c="$c$c3"
-				printf "$c3"
+				mostrar "$c3"
 			fi
 		fi
 		read -s -rN 1 c2
 	done
+	mostrar "$c"
 }
 filtrar_distros(){
-	echo "$1" | grep "$4" "$(seleccionar "$2" "$3").pkgs.org"
+	mostrar_n "$1" | grep $2 $(seleccionar "$3" "$4").pkgs.org
 }
+priult(){
+	mostrar_n "$1" | $2 -n 1 | cut -d "/" -f 3
+}
+
+mostrar_n "$@"
 
 h="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 \
  Goanna/4.0 Firefox/55.0 Basilisk/20180202"
-i="curl -s -H \"$h\" \"https://pkgs.org/search/?q=$1\""
-a=$(eval $i)
+i="curl -L -H \"$h\" \"https://pkgs.org/search/?q=$1\""
+a="$(eval "$i")"
 
-j="$(echo "slackware debian" | tr " " "\n")"
+j="$(mostrar "slackware debian" | tr " " "\n")"
 
 if [[ "$a" == "" ]];then
-	echo "Error de internet"
+	mostrar_n "Error de internet"
 	exit
 fi
 
 err403="<title>Error 403: Forbidden</title>"
-if [[ "$(echo $a | grep "$err403")" != "" ]];then
-	echo "Error 403"
+if [[ "$(mostrar_n "$a" | grep "$err403")" != "" ]];then
+	mostrar_n "Error 403"
+	exit
+fi
+err301="Moved Permanently"
+if [[ "$(mostrar_n "$a" | grep "$err301")" != "" ]];then
+	mostrar_n "Error 301"
 	exit
 fi
 
-b="$(echo "$a" | grep -Pi "http.+html" | \
+b="$(mostrar_n "$a" | grep -Pi "http.+html" | \
 grep -Po '"http.*"' | sed 's/["]//g' \
 | grep -vi arm64 | grep -vi aarch64 | grep -vi i686 | grep -vi i586
 )"
 
-b2="$( filtrar_distros "$b" "$j" 1)"
-b23="$(filtrar_distros "$b" "$j" 2 "-v")"
+b22="$(filtrar_distros "$b" "-v" "$j" 1 )"
+b23="$(filtrar_distros "$b" "  " "$j" 1 )"
 
-if [[ "$2" == "noslackware" && "$b23" != "" ]];then
+if [[ "$2" == "no$(seleccionar "$j" 1)" && "$b22" != "" ]];then
+	b="$b22"
+fi
+if [[ "$2" == "$(seleccionar "$j" 1)" && "$b23" != "" ]];then
 	b="$b23"
 fi
 
-if [[ "$b23" == "" ]];then
-	b32="$(echo "$b" | grep -o "/[.a-z0-9]*")"
+if [[ "$(priult "$b" head)" == "$(priult "$b" tail)" ]];then
+	b32="$(mostrar_n "$b" | grep -o "/[.a-z0-9]*")"
 	b4="$(seleccionar "$b32" 3)"
-	b5="$(echo "$b" | grep "$b4")"
-	echo $j
-	echo "$(seleccionar "$j" 1).pkgs.org"
-	echo "Elegido debian."
+	b5="$(seleccionar "$j" 1).pkgs.org"
+	b52="$(mostrar "$b" | grep "$b5")"
 fi
 
-if [[ "$b5" != "" ]];then
-	b="$b5"
+if [[ "$b52" != "" ]];then
+	b="$b52"
 fi
 
 b6="$(cantidad_lineas "$b")"
 
 if [[ "$b6" == "0" ]];then
-	echo "No hay para elegir."
+	mostrar_n "No hay para elegir."
 elif [[ "$b6" == "1" ]];then
 		d="$b"
 else
-	echo "$b" | grep -n ""
-	c=""
-	c2=""
-	leer_y_cambiar
-	d="$(seleccionar "$b" "$c")"
+	mostrar_n "$b" | grep -n ""
+	leer_y_cambiar # c3
+	d="$(seleccionar "$b" "$c3")"
 fi
 
-consalto "URL elegida: $d"
-d2="curl -s -H \"$h\" $d"
-e=$(eval $d2)
+mostrar_n "URL elegida: $d"
+e="$(curl -H "$h" "$d")"
 
-f=$(echo "$e" | grep -Pi "td.*text-break.*http" | grep -Po 'http[^<]*' | tail -n 1)
-consalto "Servidor oficial: "
-echo "$f"
+f="$(echo "$e" | grep -Pi "td.*text-break.*http" | \
+grep -Po 'http[^<]*' | tail -n 1)"
+
+f2="$(mostrar_n "$f" | sed "s/^https:\/\//http:\/\//g")"
+
+mostrar_n "Servidor oficial: "
+mostrar "$f2"
 
 g=$(basename $f)
 
-consalto "curl $f --output $g" ev
+mostrar_n "curl -L $f2 --output $g" ev
 
-consalto "$g"
-consalto "xdg-open $g" ev
+mostrar_n "$g"
+mostrar_n "xdg-open $g" ev
