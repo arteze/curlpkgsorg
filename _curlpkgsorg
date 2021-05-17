@@ -10,6 +10,14 @@ consalto(){
 		echo "$1"
 	fi
 }
+cantidad_lineas(){
+	if [[ "$(printf "%s" "$1" | wc -w)" == "0" ]];then
+		devuelve="0"
+	else
+		devuelve="$(($(printf "%s" "$1" | wc -l)+1))"
+	fi
+	echo "$devuelve"
+}
 
 h="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Goanna/4.0 Firefox/55.0 Basilisk/20180202"
 i="curl -s -H \"$h\" \"https://pkgs.org/search/?q=$1\""
@@ -31,19 +39,11 @@ b=$(echo "$a" | grep -Pi "http.+html" | grep -Po '"http.*"' | sed 's/["]//g' \
 
 #echo "$b" | grep -n ""
 
-b2=$(echo "$b" | grep slackware.pkgs.org)
-b22=$(echo "$b" | grep debian.pkgs.org)
+b2="$(echo "$b" | grep slackware.pkgs.org)"
+b22="$(echo "$b" | grep debian.pkgs.org)"
 
-if [[ "$b2" != "" && "$2" != "noslackware" ]];then
-	#echo "$b2"
-	b3=$(echo "$b2" | grep -v "-extras")
-	if [[ "$b3" != "" ]];then # Excluyendo extras
-		b="$b3"
-	fi
-else
-	if [[ "$b22" != "" ]];then
-		b="$b22"
-	fi
+if [[ "$2" == "noslackware" && "$b2" != "" && "$b22" != "" ]];then
+	b="$(echo "$b" | grep -v slackware.pkgs.org)"
 fi
 
 b4=$(echo "$b" | grep -o "/[.a-z0-9]*" | head -n3 | tail -n1)
@@ -52,28 +52,29 @@ if [[ "$b5" != "" ]];then
 	b="$b5"
 fi
 
-if [[ "$b" != "" ]];then
-	b6=$(echo "$b" | grep -c "")
-	if [[ "$b6" == "1" ]];then
+b6="$(cantidad_lineas $b)"
+
+if [[ "$b6" == "0" ]];then
+	echo "No hay para elegir."
+elif [[ "$b6" == "1" ]];then
 		d="$b"
-	else
-		echo "$b" | grep -n ""
-		read c
-		d=$(echo "$b" | head -n $c | tail -n 1)
-	fi
-
-	consalto "URL elegida: $d"
-	d2="curl -s -H \"$h\" $d"
-	e=$(eval $d2)
-
-	f=$(echo "$e" | grep -Pi "td.*text-break.*http" | grep -Po 'http[^<]*' | tail -n 1)
-	 consalto "Servidor oficial: "
-	 echo "$f"
-
-	g=$(basename $f)
-
-	consalto "curl $f --output $g" ev
-
-	consalto "$g"
-	consalto "xdg-open $g" ev
+else
+	echo "$b" | grep -n ""
+	read c
+	d=$(echo "$b" | head -n $c | tail -n 1)
 fi
+
+consalto "URL elegida: $d"
+d2="curl -s -H \"$h\" $d"
+e=$(eval $d2)
+
+f=$(echo "$e" | grep -Pi "td.*text-break.*http" | grep -Po 'http[^<]*' | tail -n 1)
+ consalto "Servidor oficial: "
+ echo "$f"
+
+g=$(basename $f)
+
+consalto "curl $f --output $g" ev
+
+consalto "$g"
+consalto "xdg-open $g" ev
