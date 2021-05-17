@@ -21,8 +21,21 @@ cantidad_lineas(){
 seleccionar(){
 	echo "$1" | head -n "$2" | tail -n 1
 }
+subcaracter(){
+	printf "%s" "$1" | cut -c "$2"
+}
+cambiar_letras_por_numeros(){
+	m="pqwertyuio"
+	n="$1"
+	for ((k=0;k<10;++k)); do
+		p="s/$(subcaracter "$m" $(("$k"+1)))/$(printf "%s" "$k")/g"
+		n="$(printf $n |sed "$p")"
+	done
+	printf "%s" "$n"
+}
 
-h="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 Goanna/4.0 Firefox/55.0 Basilisk/20180202"
+h="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 \
+ Goanna/4.0 Firefox/55.0 Basilisk/20180202"
 i="curl -s -H \"$h\" \"https://pkgs.org/search/?q=$1\""
 a=$(eval $i)
 
@@ -33,12 +46,14 @@ if [[ "$a" == "" ]];then
 	exit
 fi
 
-if [[ "$(echo $a | grep "<title>Error 403: Forbidden</title>")" != "" ]];then
+err403="<title>Error 403: Forbidden</title>"
+if [[ "$(echo $a | grep "$err403")" != "" ]];then
 	echo "Error 403"
 	exit
 fi
 
-b="$(echo "$a" | grep -Pi "http.+html" | grep -Po '"http.*"' | sed 's/["]//g' \
+b="$(echo "$a" | grep -Pi "http.+html" | \
+grep -Po '"http.*"' | sed 's/["]//g' \
 | grep -vi arm64 | grep -vi aarch64 | grep -vi i686 | grep -vi i586
 )"
 
@@ -69,7 +84,8 @@ elif [[ "$b6" == "1" ]];then
 else
 	echo "$b" | grep -n ""
 	read c
-	d=$(echo "$b" | head -n $c | tail -n 1)
+	c2="$(cambiar_letras_por_numeros $c)"
+	d="$(seleccionar "$b" "$c2")"
 fi
 
 consalto "URL elegida: $d"
