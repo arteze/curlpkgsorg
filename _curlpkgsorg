@@ -62,4 +62,3 @@ if [[ "$b" != "" ]];then
 	echo $g
 	xdg-open $g
 fi
-#
