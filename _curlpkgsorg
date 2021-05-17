@@ -69,8 +69,8 @@ d2="curl -s -H \"$h\" $d"
 e=$(eval $d2)
 
 f=$(echo "$e" | grep -Pi "td.*text-break.*http" | grep -Po 'http[^<]*' | tail -n 1)
- consalto "Servidor oficial: "
- echo "$f"
+consalto "Servidor oficial: "
+echo "$f"
 
 g=$(basename $f)
 
