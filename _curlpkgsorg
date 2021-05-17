@@ -33,13 +33,31 @@ cambiar_letras_por_numeros(){
 	done
 	printf "%s" "$n"
 }
+leer_y_cambiar(){
+	c=""
+	c2=""
+	while [[ "$c2" != $'\n'  ]];do
+		if [[ "$c2" != "" ]];then
+			if [ "$c2" == $'\177' ]; then
+				c="$(printf "%s" "$c" | sed "s/.$//")"
+				printf "\b \b"
+			else
+				c3="$(cambiar_letras_por_numeros "$c2")"
+				c="$c$c3"
+				printf "$c3"
+			fi
+		fi
+		read -s -rN 1 c2
+	done
+}
 
 h="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 \
  Goanna/4.0 Firefox/55.0 Basilisk/20180202"
 i="curl -s -H \"$h\" \"https://pkgs.org/search/?q=$1\""
 a=$(eval $i)
 
-j="slackware debian"  | tr " " "\n"
+j="$(echo "slackware debian" | tr " " "\n")"
+echo "jota $j jota"
 
 if [[ "$a" == "" ]];then
 	echo "Error de internet"
@@ -57,18 +75,20 @@ grep -Po '"http.*"' | sed 's/["]//g' \
 | grep -vi arm64 | grep -vi aarch64 | grep -vi i686 | grep -vi i586
 )"
 
-b2="$(echo "$b" | grep $($j).pkgs.org)"
-b22="$(echo "$b" | grep debian.pkgs.org)"
-b23="$(echo "$b" | grep -v debian.pkgs.org)"
+b2="$( echo "$b" | grep    "$(seleccionar "$j" 1).pkgs.org")"
+b23="$(echo "$b" | grep -v "$(seleccionar "$j" 2).pkgs.org")"
 
-if [[ "$2" == "noslackware" && "$b2" != "" && "$b22" != "" ]];then
-	b="$(echo "$b" | grep -v slackware.pkgs.org)"
+if [[ "$2" == "noslackware" && "$b23" != "" ]];then
+	b="$b23"
 fi
 
-if [[ "$b22" != "" && "$b23" == "" ]];then
+if [[ "$b23" == "" ]];then
 	b32="$(echo "$b" | grep -o "/[.a-z0-9]*")"
 	b4="$(seleccionar "$b32" 3)"
 	b5="$(echo "$b" | grep "$b4")"
+	echo $j
+	echo "$(seleccionar "$j" 1).pkgs.org"
+	echo "Elegido debian."
 fi
 
 if [[ "$b5" != "" ]];then
@@ -83,9 +103,10 @@ elif [[ "$b6" == "1" ]];then
 		d="$b"
 else
 	echo "$b" | grep -n ""
-	read c
-	c2="$(cambiar_letras_por_numeros $c)"
-	d="$(seleccionar "$b" "$c2")"
+	c=""
+	c2=""
+	leer_y_cambiar
+	d="$(seleccionar "$b" "$c")"
 fi
 
 consalto "URL elegida: $d"
