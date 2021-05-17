@@ -52,7 +52,7 @@ if [[ "$b5" != "" ]];then
 	b="$b5"
 fi
 
-b6="$(cantidad_lineas $b)"
+b6="$(cantidad_lineas "$b")"
 
 if [[ "$b6" == "0" ]];then
 	echo "No hay para elegir."
