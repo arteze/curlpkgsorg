@@ -118,7 +118,6 @@ elif [[ "$b6" == "1" ]];then
 else
 	mostrar_n "$b" | grep -n ""
 	leer_y_cambiar # c
-	echo cetres _$c\_
 	d="$(seleccionar "$b" "$c")"
 fi
 
