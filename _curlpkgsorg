@@ -50,6 +50,9 @@ leer_y_cambiar(){
 		read -s -rN 1 c2
 	done
 }
+filtrar_distros(){
+	echo "$1" | grep "$4" "$(seleccionar "$2" "$3").pkgs.org"
+}
 
 h="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:55.0) Gecko/20100101 \
  Goanna/4.0 Firefox/55.0 Basilisk/20180202"
@@ -57,7 +60,6 @@ i="curl -s -H \"$h\" \"https://pkgs.org/search/?q=$1\""
 a=$(eval $i)
 
 j="$(echo "slackware debian" | tr " " "\n")"
-echo "jota $j jota"
 
 if [[ "$a" == "" ]];then
 	echo "Error de internet"
@@ -75,8 +77,8 @@ grep -Po '"http.*"' | sed 's/["]//g' \
 | grep -vi arm64 | grep -vi aarch64 | grep -vi i686 | grep -vi i586
 )"
 
-b2="$( echo "$b" | grep    "$(seleccionar "$j" 1).pkgs.org")"
-b23="$(echo "$b" | grep -v "$(seleccionar "$j" 2).pkgs.org")"
+b2="$(filtrar_distros "$b" "$j" 1)"
+b23="$(filtrar_distros "$b" "$j" 2 "-v")"
 
 if [[ "$2" == "noslackware" && "$b23" != "" ]];then
 	b="$b23"
