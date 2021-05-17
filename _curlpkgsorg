@@ -117,8 +117,9 @@ elif [[ "$b6" == "1" ]];then
 		d="$b"
 else
 	mostrar_n "$b" | grep -n ""
-	leer_y_cambiar # c3
-	d="$(seleccionar "$b" "$c3")"
+	leer_y_cambiar # c
+	echo cetres _$c\_
+	d="$(seleccionar "$b" "$c")"
 fi
 
 mostrar_n "URL elegida: $d"
