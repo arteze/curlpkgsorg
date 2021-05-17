@@ -77,7 +77,7 @@ grep -Po '"http.*"' | sed 's/["]//g' \
 | grep -vi arm64 | grep -vi aarch64 | grep -vi i686 | grep -vi i586
 )"
 
-b2="$(filtrar_distros "$b" "$j" 1)"
+b2="$( filtrar_distros "$b" "$j" 1)"
 b23="$(filtrar_distros "$b" "$j" 2 "-v")"
 
 if [[ "$2" == "noslackware" && "$b23" != "" ]];then
