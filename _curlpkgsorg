@@ -40,7 +40,7 @@ leer_y_cambiar(){
 		if [[ "$c2" != "" ]];then
 			if [ "$c2" == $'\177' ]; then
 				c="$(mostrar "$c" | sed "s/.$//")"
-				mostrar "\b"
+				mostrar "\b \b"
 			else
 				c3="$(cambiar_letras_por_numeros "$c2")"
 				c="$c$c3"
@@ -49,7 +49,7 @@ leer_y_cambiar(){
 		fi
 		read -s -rN 1 c2
 	done
-	mostrar "$c"
+	mostrar_n "\r$c"
 }
 filtrar_distros(){
 	mostrar_n "$1" | grep $2 $(seleccionar "$3" "$4").pkgs.org
