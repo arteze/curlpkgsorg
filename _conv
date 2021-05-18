@@ -1,0 +1,10 @@
+#!/bin/sh
+
+function cari { printf "%i" "'$1"; }
+function carin { printf "%i\012" "'$1";}
+function carx { printf "%x" "'$1"; }
+function carxn { printf "%x\012" "'$1";}
+function cadi { printf "$1" | hexdump -v -e '1/1 "%i "'; }
+function cadin { printf "$1\012" | hexdump -v -e '1/1 "%i "'; }
+function cadx { printf "$1" | hexdump -v -e '1/1 "%x "'; }
+function cadxn { printf "$1\012" | hexdump -v -e '1/1 "%x "'; }
