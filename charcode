@@ -1,0 +1,6 @@
+#!/bin/sh
+
+charcode_i { printf "%i" "'$1"; }
+charcode_i_n { printf "%i\012" "'$1";}
+charcode_x { printf "%x" "'$1"; }
+charcode_x_n { printf "%x\012" "'$1";}
