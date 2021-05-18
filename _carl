@@ -1,0 +1,5 @@
+#!/bin/sh
+
+a="$(basename "$1")"
+curl $1  --output "$a"
+xdg-open "$a"
