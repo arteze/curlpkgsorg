@@ -1,61 +1,62 @@
 #!/bin/sh
 
 mostrar_n(){
-	if [[ "$2" == "ev" ]];then
-		eval "$1"
-	else
-		printf "$1" && printf "\012"
-	fi
+  if [[ "$2" == "ev" ]];then
+    eval "$1"
+  else
+    printf "$1" && printf "\012"
+  fi
 }
 mostrar(){
-	printf "$1"
+  printf "$1"
 }
 cantidad_lineas(){
-	if [[ "$(printf "%s" "$1" | wc -w)" == "0" ]];then
-		devuelve="0"
-	else
-		devuelve="$(($(printf "%s" "$1" | wc -l)+1))"
-	fi
-	mostrar "$devuelve"
+  if [[ "$(printf "%s" "$1" | wc -w)" == "0" ]];then
+    devuelve="0"
+  else
+    devuelve="$(($(printf "%s" "$1" | wc -l)+1))"
+  fi
+  mostrar "$devuelve"
 }
 seleccionar(){
-	mostrar "$1" | head -n "$2" | tail -n 1
+  mostrar "$1" | head -n "$2" | tail -n 1
 }
 subcaracter(){
-	mostrar "$1" | cut -c "$2"
+  mostrar "$1" | cut -c "$2"
 }
-cambiar_letras_por_numeros(){
-	m="pqwertyuio"
-	n="$1"
-	for ((k=0;k<10;++k)); do
-		p="s/$(subcaracter "$m" $(("$k"+1)))/$(printf "%s" "$k")/g"
-		n="$(printf $n |sed "$p")"
-	done
-	printf "%s" "$n"
+cambiar_numero_por_letra(){
+  [[ "$(mostrar 0123456789|grep $1)" == "" ]] &&
+    mostrar "$1" ||
+    mostrar "pqwertyuio" | cut -c "$(($1+1))"
+}
+cambiar_letra_por_numero(){
+  [[ "$(mostrar pqwertyuio|grep $1)" == "" ]] &&
+    mostrar "$1" ||
+    mostrar "$(($(mostrar "oiuytrewqp" | grep -o "$1.*" | wc -c)-2))"
 }
 leer_y_cambiar(){
-	c=""
-	c2=""
-	while [[ "$c2" != $'\n'  ]];do
-		if [[ "$c2" != "" ]];then
-			if [ "$c2" == $'\177' ]; then
-				c="$(mostrar "$c" | sed "s/.$//")"
-				mostrar "\b \b"
-			else
-				c3="$(cambiar_letras_por_numeros "$c2")"
-				c="$c$c3"
-				mostrar "$c3"
-			fi
-		fi
-		read -s -rN 1 c2
-	done
-	mostrar_n "\r$c"
+  c=""
+  c2=""
+  while [[ "$c2" != $'\n'  ]];do
+    if [[ "$c2" != "" ]];then
+      if [ "$c2" == $'\177' ]; then
+        c="$(mostrar "$c" | sed "s/.$//")"
+        mostrar "\b \b"
+      else
+        c3="$(cambiar_letra_por_numero "$c2")"
+        c="$c$c3"
+        mostrar "$c3"
+      fi
+    fi
+    read -s -rN 1 c2
+  done
+  mostrar_n "\r$c"
 }
 filtrar_distros(){
-	mostrar_n "$1" | grep $2 $(seleccionar "$3" "$4").pkgs.org
+  mostrar_n "$1" | grep $2 $(seleccionar "$3" "$4").pkgs.org
 }
 priult(){
-	mostrar_n "$1" | $2 -n 1 | cut -d "/" -f 3
+  mostrar_n "$1" | $2 -n 1 | cut -d "/" -f 3
 }
 
 mostrar_n "$@"
@@ -68,19 +69,19 @@ a="$(eval "$i")"
 j="$(mostrar "slackware debian" | tr " " "\n")"
 
 if [[ "$a" == "" ]];then
-	mostrar_n "Error de internet"
-	exit
+  mostrar_n "Error de internet"
+  exit
 fi
 
 err403="<title>Error 403: Forbidden</title>"
 if [[ "$(mostrar_n "$a" | grep "$err403")" != "" ]];then
-	mostrar_n "Error 403"
-	exit
+  mostrar_n "Error 403"
+  exit
 fi
 err301="Moved Permanently"
 if [[ "$(mostrar_n "$a" | grep "$err301")" != "" ]];then
-	mostrar_n "Error 301"
-	exit
+  mostrar_n "Error 301"
+  exit
 fi
 
 b="$(mostrar_n "$a" | grep -Pi "http.+html" | \
@@ -92,33 +93,33 @@ b22="$(filtrar_distros "$b" "-v" "$j" 1 )"
 b23="$(filtrar_distros "$b" "  " "$j" 1 )"
 
 if [[ "$2" == "no$(seleccionar "$j" 1)" && "$b22" != "" ]];then
-	b="$b22"
+  b="$b22"
 fi
 if [[ "$2" == "$(seleccionar "$j" 1)" && "$b23" != "" ]];then
-	b="$b23"
+  b="$b23"
 fi
 
 if [[ "$(priult "$b" head)" == "$(priult "$b" tail)" ]];then
-	b32="$(mostrar_n "$b" | grep -o "/[.a-z0-9]*")"
-	b4="$(seleccionar "$b32" 3)"
-	b5="$(seleccionar "$j" 1).pkgs.org"
-	b52="$(mostrar "$b" | grep "$b5")"
+  b32="$(mostrar_n "$b" | grep -o "/[.a-z0-9]*")"
+  b4="$(seleccionar "$b32" 3)"
+  b5="$(seleccionar "$j" 1).pkgs.org"
+  b52="$(mostrar "$b" | grep "$b5")"
 fi
 
 if [[ "$b52" != "" ]];then
-	b="$b52"
+  b="$b52"
 fi
 
 b6="$(cantidad_lineas "$b")"
 
 if [[ "$b6" == "0" ]];then
-	mostrar_n "No hay para elegir."
+  mostrar_n "No hay para elegir."
 elif [[ "$b6" == "1" ]];then
-		d="$b"
+    d="$b"
 else
-	mostrar_n "$b" | grep -n ""
-	leer_y_cambiar # c
-	d="$(seleccionar "$b" "$c")"
+  mostrar_n "$b" | grep -n ""
+  leer_y_cambiar # c
+  d="$(seleccionar "$b" "$c")"
 fi
 
 mostrar_n "URL elegida: $d"
